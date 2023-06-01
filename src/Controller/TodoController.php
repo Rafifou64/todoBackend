@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Todo;
+use App\Form\SearchTodoType;
 use App\Form\TodoFilterType;
 use App\Form\TodoType;
 use App\Repository\TodoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SearchType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,13 +32,28 @@ class TodoController extends AbstractController
         $form = $this->createForm(TodoFilterType::class);
         $form->handleRequest($request);
 
+        $formSearch = $this->createForm(SearchTodoType::class);
+        $formSearch->handleRequest($request);
+
         $match = [];
-        $session->set('match', $match);
         $criteria = [];
-        $session->set('criteria', $criteria);
+
+        if($formSearch->get('searchTerms')->getData())
+        {
+            return $this->render('todo/index.html.twig', [
+                'todos' => $todoRepository->searchByName($formSearch->get('searchTerms')->getData()),
+                'form' => $form->createView(),
+                'formSearch' => $formSearch->createView(),
+            ]);
+        }
 
         if ($form->isSubmitted() && isset($_POST['todo_filter']['stillTodo'])) {
             $match = ['done' => !($_POST['todo_filter']['stillTodo'])];
+            $session->set('match', $match);
+        }
+        else
+        {
+            $match = [];
             $session->set('match', $match);
         }
 
@@ -47,11 +64,13 @@ class TodoController extends AbstractController
             return $this->render('todo/index.html.twig', [
                 'todos' => $todoRepository->findBy($session->get('match', []), $session->get('criteria', [])),
                 'form' => $form->createView(),
+                'formSearch' => $formSearch->createView(),
             ]);
         } else {
             return $this->render('todo/index.html.twig', [
                 'todos' => $todoRepository->findBy($session->get('match', []), $session->get('criteria', [])),
                 'form' => $form->createView(),
+                'formSearch' => $formSearch->createView(),
             ]);
         }
     }
