@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Todo;
+use App\Form\TodoFilterType;
 use App\Form\TodoType;
 use App\Repository\TodoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -16,25 +18,40 @@ use Symfony\Component\Routing\Annotation\Route;
 class TodoController extends AbstractController
 {
     /**
-     * @Route("/", name="app_todo_index", methods={"GET"})
+     * @Route("/", name="app_todo_index", methods={"GET", "POST"})
      */
-    public function index(TodoRepository $todoRepository, Request $request): Response
+    public function index(TodoRepository $todoRepository, Request $request, RequestStack $requestStack): Response
     {
+        $session = $requestStack->getSession();
+
         $order = $request->query->get('order');
         $orderby = $request->query->get('orderby');
 
-        if(isset($order) && isset($orderby))
-        {
+        $form = $this->createForm(TodoFilterType::class);
+        $form->handleRequest($request);
+
+        $match = [];
+        $session->set('match', $match);
+        $criteria = [];
+        $session->set('criteria', $criteria);
+
+        if ($form->isSubmitted() && isset($_POST['todo_filter']['stillTodo'])) {
+            $match = ['done' => !($_POST['todo_filter']['stillTodo'])];
+            $session->set('match', $match);
+        }
+
+        if (isset($order) && isset($orderby)) {
             $criteria = [$orderby => $order];
+            $session->set('criteria', $criteria);
 
             return $this->render('todo/index.html.twig', [
-                'todos' => $todoRepository->findBy([], $criteria),
+                'todos' => $todoRepository->findBy($session->get('match', []), $session->get('criteria', [])),
+                'form' => $form->createView(),
             ]);
-        }
-        else
-        {
+        } else {
             return $this->render('todo/index.html.twig', [
-                'todos' => $todoRepository->findAll(),
+                'todos' => $todoRepository->findBy($session->get('match', []), $session->get('criteria', [])),
+                'form' => $form->createView(),
             ]);
         }
     }
@@ -95,7 +112,7 @@ class TodoController extends AbstractController
      */
     public function delete(Request $request, Todo $todo, TodoRepository $todoRepository): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$todo->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $todo->getId(), $request->request->get('_token'))) {
             $todoRepository->remove($todo, true);
         }
 

@@ -5,6 +5,14 @@
 {% block body %}
     <h1>Todo index</h1>
 
+    {{ form_start(form) }}
+
+        {{ form_widget(form) }}
+        
+        <input type="submit" value="Go"/>
+
+    {{ form_end(form) }}
+
     <table class="table">
         <thead>
             <tr>
