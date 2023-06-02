@@ -17,6 +17,7 @@ class TodoType extends AbstractType
             ->add('description')
             ->add('done')
             ->add('priority', EntityType::class, ['class'=>'App\Entity\Priority', 'choice_label'=>'name'])
+            ->add('user', EntityType::class, ['class'=>'App\Entity\User', 'choice_label'=>'name'])
         ;
     }
 
