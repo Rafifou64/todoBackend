@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Todo;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -15,6 +16,7 @@ class TodoType extends AbstractType
             ->add('name')
             ->add('description')
             ->add('done')
+            ->add('priority', EntityType::class, ['class'=>'App\Entity\Priority', 'choice_label'=>'name'])
         ;
     }
 

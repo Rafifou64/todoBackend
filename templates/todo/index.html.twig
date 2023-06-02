@@ -27,6 +27,7 @@
                 <th><a href="{{ path('app_todo_index') }}?orderby=id&order=asc">Id</a></th>
                 <th><a href="{{ path('app_todo_index') }}?orderby=name&order=asc">Name</a></th>
                 <th>Description</th>
+                <th>Priorité</th>
                 <th>Statut</th>
                 <th>actions</th>
             </tr>
@@ -37,6 +38,7 @@
                 <td>{{ todo.id }}</td>
                 <td>{{ todo.name }}</td>
                 <td>{{ todo.description }}</td>
+                <td>{{ todo.Priority.name }}</td>
                 {% if(todo.done) %}
                 <td>Terminé</td>
                 {% else %}
