@@ -28,6 +28,7 @@
                 <th><a href="{{ path('app_todo_index') }}?orderby=name&order=asc">Name</a></th>
                 <th>Description</th>
                 <th>Priorité</th>
+                <th>Personne associé</th>
                 <th>Statut</th>
                 <th>actions</th>
             </tr>
@@ -38,7 +39,12 @@
                 <td>{{ todo.id }}</td>
                 <td>{{ todo.name }}</td>
                 <td>{{ todo.description }}</td>
-                <td>{{ todo.Priority.name }}</td>
+                <td>{{ todo.priority.name }}</td>
+                {% if todo.user.name is defined %}
+                <td>{{ todo.user.name }}</td>
+                {% else %}
+                <td>Assigné à personne</td>
+                {% endif %}
                 {% if(todo.done) %}
                 <td>Terminé</td>
                 {% else %}
